@@ -7,6 +7,7 @@ package daodao
 // Client is the Daodao API request client.
 type Client struct {
 	accessToken string
+	userID      string
 }
 
 // NewClient creates and return a new Daodao API client.

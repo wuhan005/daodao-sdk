@@ -8,7 +8,7 @@ import (
 	"net/url"
 )
 
-func (c *Client) DefaultForm() url.Values {
+func (c *Client) DefaultParameters() url.Values {
 	data := map[string]string{
 		"access_token":       c.accessToken,
 		"app_channel":        "AppStore",

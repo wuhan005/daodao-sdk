@@ -58,6 +58,11 @@ func (r *Request) SetHeader(k, v string) *Request {
 	return r
 }
 
+func (r *Request) Query(data url.Values) *Request {
+	r.query = data
+	return r
+}
+
 // Form sets the form body and `application/x-www-form-urlencoded` content-type header.
 func (r *Request) Form(data url.Values) *Request {
 	r.body = data
@@ -71,16 +76,22 @@ func (r *Request) Do(httpClient ...http.Client) (*Response, error) {
 		client = httpClient[0]
 	}
 
-	baseURL, _ := url.Parse("https://api.daodao.cn/api")
-	baseURL.Path = path.Join("/api", r.path)
-	baseURL.RawQuery = r.query.Encode()
-
 	// Sign signature.
 	timestamp := strconv.Itoa(int(time.Now().UnixNano() / 1e6))
 	nonce := uuid.NewV4().String() + timestamp
-	r.body.Set("nonce", nonce)
-	r.body.Set("timestamp", timestamp)
-	r.body.Set("sign", Sign(nonce, timestamp))
+	if r.method == http.MethodPost {
+		r.body.Set("nonce", nonce)
+		r.body.Set("timestamp", timestamp)
+		r.body.Set("sign", Sign(nonce, timestamp))
+	} else if r.method == http.MethodGet {
+		r.query.Set("nonce", nonce)
+		r.query.Set("timestamp", timestamp)
+		r.query.Set("sign", Sign(nonce, timestamp))
+	}
+
+	baseURL, _ := url.Parse("https://api.daodao.cn/api")
+	baseURL.Path = path.Join("/api", r.path)
+	baseURL.RawQuery = r.query.Encode()
 
 	req, err := http.NewRequest(r.method, baseURL.String(), strings.NewReader(r.body.Encode()))
 	if err != nil {

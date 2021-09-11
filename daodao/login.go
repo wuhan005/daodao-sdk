@@ -6,6 +6,7 @@ package daodao
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -19,7 +20,7 @@ type LoginResponse struct {
 	Data       struct {
 		Code         string `json:"code"`
 		Message      string `json:"message"`
-		UserId       int    `json:"user_id"`
+		UserID       int    `json:"user_id"`
 		ShortUuid    string `json:"short_uuid"`
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
@@ -29,7 +30,7 @@ type LoginResponse struct {
 
 // Login authenticate the Daodao API account.
 func (c *Client) Login(phone, password string) (*LoginResponse, error) {
-	form := c.DefaultForm()
+	form := c.DefaultParameters()
 	form.Set("address", phone)
 	form.Set("password", password)
 
@@ -46,5 +47,9 @@ func (c *Client) Login(phone, password string) (*LoginResponse, error) {
 	if err := resp.ToJSON(&loginResponse); err != nil {
 		return nil, errors.Wrap(err, "to json")
 	}
+
+	c.accessToken = loginResponse.Data.AccessToken
+	c.userID = strconv.Itoa(loginResponse.Data.UserID)
+	
 	return &loginResponse, nil
 }
