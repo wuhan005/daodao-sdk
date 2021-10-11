@@ -50,6 +50,6 @@ func (c *Client) Login(phone, password string) (*LoginResponse, error) {
 
 	c.accessToken = loginResponse.Data.AccessToken
 	c.userID = strconv.Itoa(loginResponse.Data.UserID)
-	
+
 	return &loginResponse, nil
 }
